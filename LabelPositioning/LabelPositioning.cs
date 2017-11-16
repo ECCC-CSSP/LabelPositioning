@@ -48,13 +48,14 @@ namespace LabelPositioning
         #endregion Functions public
 
         #region Functions private
-        private void AddPointToList(float x, float y)
+        private void AddPointToList(float Lng, float Lat)
         {
             LabelPosition labelPosition = new LabelPosition()
             {
-                SitePoint = new PointF(x, y),
-                LabelPoint = new PointF(x, y),
-                LabelRectangle = new RectangleF(x, y, 5, 5),
+                SitePoint = new Coord() { Lat = Lat, Lng = Lng, Ordinal = 0 },
+                LabelPoint = new Coord() { Lat = Lat - 1, Lng = Lng + 1, Ordinal = 0 },
+                LabelNorthEast = new Coord() { Lat = Lat - LabelHeight, Lng = Lng + LabelWidth, Ordinal = 0 },
+                LabelSouthWest = new Coord() { Lat = Lat - 1, Lng = Lng + 1, Ordinal = 0 },
                 Position = PositionEnum.LeftBottom,
                 Distance = 0.0f,
                 Ordinal = LabelPositionList.Count(),
@@ -76,31 +77,35 @@ namespace LabelPositioning
 
             if (LabelPositionList.Count > 0)
             {
-                AveragePoint = new Point((int)LabelPositionList.Average(c => c.SitePoint.X), (int)LabelPositionList.Average(c => c.SitePoint.Y));
+                AveragePoint = new Point((int)LabelPositionList.Average(c => c.SitePoint.Lng), (int)LabelPositionList.Average(c => c.SitePoint.Lat));
 
                 foreach (LabelPosition labelPosition in LabelPositionList)
                 {
                     labelPosition.LabelPoint = labelPosition.SitePoint;
-                    labelPosition.Distance = (float)Math.Sqrt((labelPosition.SitePoint.X - AveragePoint.X) * (labelPosition.SitePoint.X - AveragePoint.X) + (labelPosition.SitePoint.Y - AveragePoint.Y) * (labelPosition.SitePoint.Y - AveragePoint.Y));
+                    labelPosition.Distance = (float)Math.Sqrt((labelPosition.SitePoint.Lng - AveragePoint.X) * (labelPosition.SitePoint.Lng - AveragePoint.X) + (labelPosition.SitePoint.Lat - AveragePoint.Y) * (labelPosition.SitePoint.Lat - AveragePoint.Y));
 
-                    if ((labelPosition.SitePoint.X - AveragePoint.X) >= 0 && (labelPosition.SitePoint.Y - AveragePoint.Y) <= 0) // first quartier
+                    if ((labelPosition.SitePoint.Lng - AveragePoint.X) >= 0 && (labelPosition.SitePoint.Lat - AveragePoint.Y) <= 0) // first quartier
                     {
-                        labelPosition.LabelRectangle = new RectangleF(labelPosition.SitePoint.X + 1, labelPosition.SitePoint.Y - LabelHeight - 1, LabelWidth, LabelHeight);
+                        labelPosition.LabelSouthWest = new Coord() { Lat = labelPosition.SitePoint.Lat - 1, Lng = labelPosition.SitePoint.Lng + 1, Ordinal = 0 };
+                        labelPosition.LabelNorthEast = new Coord() { Lat = labelPosition.SitePoint.Lat - LabelHeight - 1, Lng = labelPosition.SitePoint.Lng + LabelWidth + 1, Ordinal = 0 };
                         labelPosition.Position = PositionEnum.LeftBottom;
                     }
-                    else if ((labelPosition.SitePoint.X - AveragePoint.X) > 0 && (labelPosition.SitePoint.Y - AveragePoint.Y) > 0) // second quartier
+                    else if ((labelPosition.SitePoint.Lng - AveragePoint.X) > 0 && (labelPosition.SitePoint.Lat - AveragePoint.Y) > 0) // second quartier
                     {
-                        labelPosition.LabelRectangle = new RectangleF(labelPosition.SitePoint.X + 1, labelPosition.SitePoint.Y + 1, LabelWidth, LabelHeight);
+                        labelPosition.LabelSouthWest = new Coord() { Lat = labelPosition.SitePoint.Lat + LabelHeight + 1, Lng = labelPosition.SitePoint.Lng + 1, Ordinal = 0 };
+                        labelPosition.LabelNorthEast = new Coord() { Lat = labelPosition.SitePoint.Lat - 1, Lng = labelPosition.SitePoint.Lng + LabelWidth + 1, Ordinal = 0 };
                         labelPosition.Position = PositionEnum.LeftTop;
                     }
-                    else if ((labelPosition.SitePoint.X - AveragePoint.X) < 0 && (labelPosition.SitePoint.Y - AveragePoint.Y) > 0) // third quartier
+                    else if ((labelPosition.SitePoint.Lng - AveragePoint.X) < 0 && (labelPosition.SitePoint.Lat - AveragePoint.Y) > 0) // third quartier
                     {
-                        labelPosition.LabelRectangle = new RectangleF(labelPosition.SitePoint.X - LabelWidth - 1, labelPosition.SitePoint.Y + 1, LabelWidth, LabelHeight);
+                        labelPosition.LabelSouthWest = new Coord() { Lat = labelPosition.SitePoint.Lat + LabelHeight + 1, Lng = labelPosition.SitePoint.Lng - LabelWidth - 1, Ordinal = 0 };
+                        labelPosition.LabelNorthEast = new Coord() { Lat = labelPosition.SitePoint.Lat + 1, Lng = labelPosition.SitePoint.Lng + 1, Ordinal = 0 };
                         labelPosition.Position = PositionEnum.RightTop;
                     }
                     else // forth quartier
                     {
-                        labelPosition.LabelRectangle = new RectangleF(labelPosition.SitePoint.X - LabelWidth - 1, labelPosition.SitePoint.Y - LabelHeight - 1, LabelWidth, LabelHeight);
+                        labelPosition.LabelSouthWest = new Coord() { Lat = labelPosition.SitePoint.Lat - 1, Lng = labelPosition.SitePoint.Lng - LabelWidth - 1, Ordinal = 0 };
+                        labelPosition.LabelNorthEast = new Coord() { Lat = labelPosition.SitePoint.Lat - LabelHeight - 1, Lng = labelPosition.SitePoint.Lng - 1, Ordinal = 0 };
                         labelPosition.Position = PositionEnum.RightBottom;
                     }
                 }
@@ -111,10 +116,10 @@ namespace LabelPositioning
                     {
                         List<Coord> coordList = new List<Coord>()
                         {
-                            new Coord() { Lat = labelPosition.LabelRectangle.Y, Lng = labelPosition.LabelRectangle.X, Ordinal = 0 },
-                            new Coord() { Lat = labelPosition.LabelRectangle.Y + labelPosition.LabelRectangle.Height, Lng = labelPosition.LabelRectangle.X, Ordinal = 0 },
-                            new Coord() { Lat = labelPosition.LabelRectangle.Y + labelPosition.LabelRectangle.Height, Lng = labelPosition.LabelRectangle.X + labelPosition.LabelRectangle.Width, Ordinal = 0 },
-                            new Coord() { Lat = labelPosition.LabelRectangle.Y, Lng = labelPosition.LabelRectangle.X + labelPosition.LabelRectangle.Width, Ordinal = 0 },
+                            new Coord() { Lat = labelPosition.LabelSouthWest.Lat, Lng = labelPosition.LabelSouthWest.Lng, Ordinal = 0 },
+                            new Coord() { Lat = labelPosition.LabelSouthWest.Lat, Lng = labelPosition.LabelNorthEast.Lng, Ordinal = 0 },
+                            new Coord() { Lat = labelPosition.LabelNorthEast.Lat, Lng = labelPosition.LabelNorthEast.Lng, Ordinal = 0 },
+                            new Coord() { Lat = labelPosition.LabelNorthEast.Lat, Lng = labelPosition.LabelSouthWest.Lng, Ordinal = 0 },
                         };
 
                         bool PleaseRedo = false;
@@ -122,54 +127,58 @@ namespace LabelPositioning
                         {
                             Coord coord = new Coord()
                             {
-                                Lat = labelPosition2.LabelPoint.Y,
-                                Lng = labelPosition2.LabelPoint.X,
+                                Lat = labelPosition2.LabelPoint.Lat,
+                                Lng = labelPosition2.LabelPoint.Lng,
                                 Ordinal = 0,
                             };
                             if (CoordInPolygon(coordList, coord))
                             {
                                 float XNew = StepSize;
                                 float YNew = StepSize;
-                                float dist = (float)Math.Sqrt((AveragePoint.Y - labelPosition.SitePoint.Y) * (AveragePoint.Y - labelPosition.SitePoint.Y) + (AveragePoint.X - labelPosition.SitePoint.X) * (AveragePoint.X - labelPosition.SitePoint.X));
+                                float dist = (float)Math.Sqrt((AveragePoint.Y - labelPosition.SitePoint.Lat) * (AveragePoint.Y - labelPosition.SitePoint.Lat) + (AveragePoint.X - labelPosition.SitePoint.Lng) * (AveragePoint.X - labelPosition.SitePoint.Lng));
                                 float factor = dist / StepSize;
-                                float deltX = Math.Abs((AveragePoint.X - labelPosition.LabelPoint.X) / factor);
-                                float deltY = Math.Abs((AveragePoint.Y - labelPosition.LabelPoint.Y) / factor);
+                                float deltX = Math.Abs((AveragePoint.X - labelPosition.LabelPoint.Lng) / factor);
+                                float deltY = Math.Abs((AveragePoint.Y - labelPosition.LabelPoint.Lat) / factor);
                                 switch (labelPosition.Position)
                                 {
                                     case PositionEnum.Error:
                                         break;
                                     case PositionEnum.LeftBottom:
                                         {
-                                            XNew = labelPosition.LabelPoint.X + deltX;
-                                            YNew = labelPosition.LabelPoint.Y - deltY;
-                                            labelPosition.LabelRectangle = new RectangleF(XNew, YNew - LabelHeight, labelPosition.LabelRectangle.Width, labelPosition.LabelRectangle.Height);
+                                            XNew = labelPosition.LabelPoint.Lng + deltX;
+                                            YNew = labelPosition.LabelPoint.Lat - deltY;
+                                            labelPosition.LabelSouthWest = new Coord() { Lat = YNew, Lng = XNew, Ordinal = 0 };
+                                            labelPosition.LabelNorthEast = new Coord() { Lat = YNew - LabelHeight, Lng = XNew + LabelWidth, Ordinal = 0 };
                                         }
                                         break;
                                     case PositionEnum.RightBottom:
                                         {
-                                            XNew = labelPosition.LabelPoint.X - deltX;
-                                            YNew = labelPosition.LabelPoint.Y - deltY;
-                                            labelPosition.LabelRectangle = new RectangleF(XNew - LabelWidth, YNew - LabelHeight, LabelWidth, LabelHeight);
+                                            XNew = labelPosition.LabelPoint.Lng - deltX;
+                                            YNew = labelPosition.LabelPoint.Lat - deltY;
+                                            labelPosition.LabelSouthWest = new Coord() { Lat = YNew, Lng = XNew - LabelWidth, Ordinal = 0 };
+                                            labelPosition.LabelNorthEast = new Coord() { Lat = YNew - LabelHeight, Lng = XNew, Ordinal = 0 };
                                         }
                                         break;
                                     case PositionEnum.LeftTop:
                                         {
-                                            XNew = labelPosition.LabelPoint.X + deltX;
-                                            YNew = labelPosition.LabelPoint.Y + deltY;
-                                            labelPosition.LabelRectangle = new RectangleF(XNew, YNew, LabelWidth, LabelHeight);
+                                            XNew = labelPosition.LabelPoint.Lng + deltX;
+                                            YNew = labelPosition.LabelPoint.Lat + deltY;
+                                            labelPosition.LabelSouthWest = new Coord() { Lat = YNew + LabelHeight, Lng = XNew, Ordinal = 0 };
+                                            labelPosition.LabelNorthEast = new Coord() { Lat = YNew, Lng = XNew + LabelWidth, Ordinal = 0 };
                                         }
                                         break;
                                     case PositionEnum.RightTop:
                                         {
-                                            XNew = labelPosition.LabelPoint.X - deltX;
-                                            YNew = labelPosition.LabelPoint.Y + deltY;
-                                            labelPosition.LabelRectangle = new RectangleF(XNew - LabelWidth - 1, YNew, LabelWidth, LabelHeight);
+                                            XNew = labelPosition.LabelPoint.Lng - deltX;
+                                            YNew = labelPosition.LabelPoint.Lat + deltY;
+                                            labelPosition.LabelSouthWest = new Coord() { Lat = YNew + LabelHeight, Lng = XNew - LabelWidth, Ordinal = 0 };
+                                            labelPosition.LabelNorthEast = new Coord() { Lat = YNew, Lng = XNew, Ordinal = 0 };
                                         }
                                         break;
                                     default:
                                         break;
                                 }
-                                labelPosition.LabelPoint = new PointF(XNew, YNew);
+                                labelPosition.LabelPoint = new Coord() { Lat = YNew, Lng = XNew, Ordinal = 0 };
                                 PleaseRedo = true;
                                 break;
                             }
@@ -185,10 +194,10 @@ namespace LabelPositioning
                     {
                         List<Coord> coordList = new List<Coord>()
                         {
-                            new Coord() { Lat = labelPosition.LabelRectangle.Y, Lng = labelPosition.LabelRectangle.X, Ordinal = 0 },
-                            new Coord() { Lat = labelPosition.LabelRectangle.Y + labelPosition.LabelRectangle.Height, Lng = labelPosition.LabelRectangle.X, Ordinal = 0 },
-                            new Coord() { Lat = labelPosition.LabelRectangle.Y + labelPosition.LabelRectangle.Height, Lng = labelPosition.LabelRectangle.X + labelPosition.LabelRectangle.Width, Ordinal = 0 },
-                            new Coord() { Lat = labelPosition.LabelRectangle.Y, Lng = labelPosition.LabelRectangle.X + labelPosition.LabelRectangle.Width, Ordinal = 0 },
+                            new Coord() { Lat = labelPosition.LabelSouthWest.Lat, Lng = labelPosition.LabelSouthWest.Lng, Ordinal = 0 },
+                            new Coord() { Lat = labelPosition.LabelSouthWest.Lat, Lng = labelPosition.LabelNorthEast.Lng, Ordinal = 0 },
+                            new Coord() { Lat = labelPosition.LabelNorthEast.Lat, Lng = labelPosition.LabelNorthEast.Lng, Ordinal = 0 },
+                            new Coord() { Lat = labelPosition.LabelNorthEast.Lat, Lng = labelPosition.LabelSouthWest.Lng, Ordinal = 0 },
                         };
 
                         bool PleaseRedo = false;
@@ -196,10 +205,10 @@ namespace LabelPositioning
                         {
                             List<Coord> coordToCompare = new List<Coord>()
                             {
-                                new Coord() { Lat = labelPosition2.LabelRectangle.Y, Lng = labelPosition2.LabelRectangle.X, Ordinal = 0 },
-                                new Coord() { Lat = labelPosition2.LabelRectangle.Y + labelPosition2.LabelRectangle.Height, Lng = labelPosition2.LabelRectangle.X, Ordinal = 0 },
-                                new Coord() { Lat = labelPosition2.LabelRectangle.Y + labelPosition2.LabelRectangle.Height, Lng = labelPosition2.LabelRectangle.X + labelPosition2.LabelRectangle.Width, Ordinal = 0 },
-                                new Coord() { Lat = labelPosition2.LabelRectangle.Y, Lng = labelPosition2.LabelRectangle.X + labelPosition2.LabelRectangle.Width, Ordinal = 0 },
+                                new Coord() { Lat = labelPosition2.LabelSouthWest.Lat, Lng = labelPosition2.LabelSouthWest.Lng, Ordinal = 0 },
+                                new Coord() { Lat = labelPosition2.LabelSouthWest.Lat, Lng = labelPosition2.LabelNorthEast.Lng, Ordinal = 0 },
+                                new Coord() { Lat = labelPosition2.LabelNorthEast.Lat, Lng = labelPosition2.LabelNorthEast.Lng, Ordinal = 0 },
+                                new Coord() { Lat = labelPosition2.LabelNorthEast.Lat, Lng = labelPosition2.LabelSouthWest.Lng, Ordinal = 0 },
                             };
                             for (int i = 0; i < 4; i++)
                             {
@@ -207,46 +216,50 @@ namespace LabelPositioning
                                 {
                                     float XNew = StepSize;
                                     float YNew = StepSize;
-                                    float dist = (float)Math.Sqrt((AveragePoint.Y - labelPosition.SitePoint.Y) * (AveragePoint.Y - labelPosition.SitePoint.Y) + (AveragePoint.X - labelPosition.SitePoint.X) * (AveragePoint.X - labelPosition.SitePoint.X));
+                                    float dist = (float)Math.Sqrt((AveragePoint.Y - labelPosition.SitePoint.Lat) * (AveragePoint.Y - labelPosition.SitePoint.Lat) + (AveragePoint.X - labelPosition.SitePoint.Lng) * (AveragePoint.X - labelPosition.SitePoint.Lng));
                                     float factor = dist / StepSize;
-                                    float deltX = Math.Abs((AveragePoint.X - labelPosition.LabelPoint.X) / factor);
-                                    float deltY = Math.Abs((AveragePoint.Y - labelPosition.LabelPoint.Y) / factor);
+                                    float deltX = Math.Abs((AveragePoint.X - labelPosition.LabelPoint.Lng) / factor);
+                                    float deltY = Math.Abs((AveragePoint.Y - labelPosition.LabelPoint.Lat) / factor);
                                     switch (labelPosition.Position)
                                     {
                                         case PositionEnum.Error:
                                             break;
                                         case PositionEnum.LeftBottom:
                                             {
-                                                XNew = labelPosition.LabelPoint.X + deltX;
-                                                YNew = labelPosition.LabelPoint.Y - deltY;
-                                                labelPosition.LabelRectangle = new RectangleF(XNew, YNew - LabelHeight, labelPosition.LabelRectangle.Width, labelPosition.LabelRectangle.Height);
+                                                XNew = labelPosition.LabelPoint.Lng + deltX;
+                                                YNew = labelPosition.LabelPoint.Lat - deltY;
+                                                labelPosition.LabelSouthWest = new Coord() { Lat = YNew, Lng = XNew, Ordinal = 0 };
+                                                labelPosition.LabelNorthEast = new Coord() { Lat = YNew - LabelHeight, Lng = XNew + LabelWidth, Ordinal = 0 };
                                             }
                                             break;
                                         case PositionEnum.RightBottom:
                                             {
-                                                XNew = labelPosition.LabelPoint.X - deltX;
-                                                YNew = labelPosition.LabelPoint.Y - deltY;
-                                                labelPosition.LabelRectangle = new RectangleF(XNew - LabelWidth, YNew - LabelHeight, LabelWidth, LabelHeight);
+                                                XNew = labelPosition.LabelPoint.Lng - deltX;
+                                                YNew = labelPosition.LabelPoint.Lat - deltY;
+                                                labelPosition.LabelSouthWest = new Coord() { Lat = YNew, Lng = XNew - LabelWidth, Ordinal = 0 };
+                                                labelPosition.LabelNorthEast = new Coord() { Lat = YNew - LabelHeight, Lng = XNew, Ordinal = 0 };
                                             }
                                             break;
                                         case PositionEnum.LeftTop:
                                             {
-                                                XNew = labelPosition.LabelPoint.X + deltX;
-                                                YNew = labelPosition.LabelPoint.Y + deltY;
-                                                labelPosition.LabelRectangle = new RectangleF(XNew, YNew, LabelWidth, LabelHeight);
+                                                XNew = labelPosition.LabelPoint.Lng + deltX;
+                                                YNew = labelPosition.LabelPoint.Lat + deltY;
+                                                labelPosition.LabelSouthWest = new Coord() { Lat = YNew + LabelHeight, Lng = XNew, Ordinal = 0 };
+                                                labelPosition.LabelNorthEast = new Coord() { Lat = YNew, Lng = XNew + LabelWidth, Ordinal = 0 };
                                             }
                                             break;
                                         case PositionEnum.RightTop:
                                             {
-                                                XNew = labelPosition.LabelPoint.X - deltX;
-                                                YNew = labelPosition.LabelPoint.Y + deltY;
-                                                labelPosition.LabelRectangle = new RectangleF(XNew - LabelWidth - 1, YNew, LabelWidth, LabelHeight);
+                                                XNew = labelPosition.LabelPoint.Lng - deltX;
+                                                YNew = labelPosition.LabelPoint.Lat + deltY;
+                                                labelPosition.LabelSouthWest = new Coord() { Lat = YNew + LabelHeight, Lng = XNew - LabelWidth, Ordinal = 0 };
+                                                labelPosition.LabelNorthEast = new Coord() { Lat = YNew, Lng = XNew, Ordinal = 0 };
                                             }
                                             break;
                                         default:
                                             break;
                                     }
-                                    labelPosition.LabelPoint = new PointF(XNew, YNew);
+                                    labelPosition.LabelPoint = new Coord() { Lat = YNew, Lng = XNew, Ordinal = 0 };
                                     PleaseRedo = true;
                                     break;
                                 }
@@ -268,43 +281,37 @@ namespace LabelPositioning
 
                     foreach (LabelPosition labelPosition in LabelPositionList)
                     {
-                        g.DrawLine(new Pen(Color.Blue, 1.0f), labelPosition.SitePoint, AveragePoint);
+                        g.DrawLine(new Pen(Color.Blue, 1.0f), new PointF(labelPosition.SitePoint.Lng, labelPosition.SitePoint.Lat), AveragePoint);
+                        PointF p = new PointF();
                         switch (labelPosition.Position)
                         {
                             case PositionEnum.Error:
                                 break;
                             case PositionEnum.LeftBottom:
                                 {
-                                    PointF p = new PointF(labelPosition.LabelRectangle.X, labelPosition.LabelRectangle.Y + labelPosition.LabelRectangle.Height);
-                                    g.DrawLine(new Pen(Color.Red, 1.0f), labelPosition.SitePoint, p);
-                                    g.DrawRectangle(new Pen(Color.Red, 1.0f), labelPosition.LabelRectangle.X, labelPosition.LabelRectangle.Y, labelPosition.LabelRectangle.Width, labelPosition.LabelRectangle.Height);
+                                    p = new PointF(labelPosition.LabelSouthWest.Lng, labelPosition.LabelSouthWest.Lat);
                                 }
                                 break;
                             case PositionEnum.RightBottom:
                                 {
-                                    PointF p = new PointF(labelPosition.LabelRectangle.X + labelPosition.LabelRectangle.Width, labelPosition.LabelRectangle.Y + labelPosition.LabelRectangle.Height);
-                                    g.DrawLine(new Pen(Color.Red, 1.0f), labelPosition.SitePoint, p);
-                                    g.DrawRectangle(new Pen(Color.Red, 1.0f), labelPosition.LabelRectangle.X, labelPosition.LabelRectangle.Y, labelPosition.LabelRectangle.Width, labelPosition.LabelRectangle.Height);
+                                    p = new PointF(labelPosition.LabelNorthEast.Lng, labelPosition.LabelSouthWest.Lat);
                                 }
                                 break;
                             case PositionEnum.LeftTop:
                                 {
-                                    PointF p = new PointF(labelPosition.LabelRectangle.X, labelPosition.LabelRectangle.Y);
-                                    g.DrawLine(new Pen(Color.Red, 1.0f), labelPosition.SitePoint, p);
-                                    g.DrawRectangle(new Pen(Color.Red, 1.0f), labelPosition.LabelRectangle.X, labelPosition.LabelRectangle.Y, labelPosition.LabelRectangle.Width, labelPosition.LabelRectangle.Height);
+                                    p = new PointF(labelPosition.LabelSouthWest.Lng, labelPosition.LabelNorthEast.Lat);
                                 }
                                 break;
                             case PositionEnum.RightTop:
                                 {
-                                    PointF p = new PointF(labelPosition.LabelRectangle.X + labelPosition.LabelRectangle.Width, labelPosition.LabelRectangle.Y);
-                                    g.DrawLine(new Pen(Color.Red, 1.0f), labelPosition.SitePoint, p);
-                                    g.DrawRectangle(new Pen(Color.Red, 1.0f), labelPosition.LabelRectangle.X, labelPosition.LabelRectangle.Y, labelPosition.LabelRectangle.Width, labelPosition.LabelRectangle.Height);
+                                    p = new PointF(labelPosition.LabelNorthEast.Lng, labelPosition.LabelNorthEast.Lat);
                                 }
                                 break;
                             default:
                                 break;
                         }
-
+                        g.DrawLine(new Pen(Color.Red, 1.0f), new PointF(labelPosition.SitePoint.Lng, labelPosition.SitePoint.Lat), p);
+                        g.DrawRectangle(new Pen(Color.Red, 1.0f), labelPosition.LabelSouthWest.Lng, labelPosition.LabelNorthEast.Lat, labelPosition.LabelNorthEast.Lng - labelPosition.LabelSouthWest.Lng, labelPosition.LabelSouthWest.Lat - labelPosition.LabelNorthEast.Lat);
                     }
                 }
             }
@@ -337,10 +344,11 @@ namespace LabelPositioning
 
     public class LabelPosition
     {
-        public PointF SitePoint { get; set; }
-        public PointF LabelPoint { get; set; }
+        public Coord SitePoint { get; set; }
+        public Coord LabelPoint { get; set; }
         public PositionEnum Position { get; set; }
-        public RectangleF LabelRectangle { get; set; }
+        public Coord LabelNorthEast { get; set; }
+        public Coord LabelSouthWest { get; set; }
         public float Distance { get; set; }
         public int Ordinal { get; set; }
 
