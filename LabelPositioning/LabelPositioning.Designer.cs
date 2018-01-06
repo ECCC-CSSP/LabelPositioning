@@ -30,8 +30,8 @@
         {
             this.pictureBoxLabelPosition = new System.Windows.Forms.PictureBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.butClearAll = new System.Windows.Forms.Button();
             this.lblClickInTheBoxBelow = new System.Windows.Forms.Label();
+            this.butClearAll = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxLabelPosition)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -69,6 +69,15 @@
             this.splitContainer1.SplitterDistance = 44;
             this.splitContainer1.TabIndex = 1;
             // 
+            // lblClickInTheBoxBelow
+            // 
+            this.lblClickInTheBoxBelow.AutoSize = true;
+            this.lblClickInTheBoxBelow.Location = new System.Drawing.Point(182, 11);
+            this.lblClickInTheBoxBelow.Name = "lblClickInTheBoxBelow";
+            this.lblClickInTheBoxBelow.Size = new System.Drawing.Size(149, 13);
+            this.lblClickInTheBoxBelow.TabIndex = 1;
+            this.lblClickInTheBoxBelow.Text = "Click on the box below to start";
+            // 
             // butClearAll
             // 
             this.butClearAll.Location = new System.Drawing.Point(25, 10);
@@ -78,15 +87,6 @@
             this.butClearAll.Text = "Clear all";
             this.butClearAll.UseVisualStyleBackColor = true;
             this.butClearAll.Click += new System.EventHandler(this.butClearAll_Click);
-            // 
-            // lblClickInTheBoxBelow
-            // 
-            this.lblClickInTheBoxBelow.AutoSize = true;
-            this.lblClickInTheBoxBelow.Location = new System.Drawing.Point(182, 11);
-            this.lblClickInTheBoxBelow.Name = "lblClickInTheBoxBelow";
-            this.lblClickInTheBoxBelow.Size = new System.Drawing.Size(149, 13);
-            this.lblClickInTheBoxBelow.TabIndex = 1;
-            this.lblClickInTheBoxBelow.Text = "Click on the box below to start";
             // 
             // LabelPositioning
             // 

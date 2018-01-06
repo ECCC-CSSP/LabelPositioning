@@ -331,7 +331,6 @@ namespace LabelPositioning
             return InPoly;
         }
         #endregion Functions private
-
     }
     public enum PositionEnum
     {
